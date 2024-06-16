@@ -78,5 +78,6 @@ async def delete_habit(message: Message):
     await sync_to_async(HabitDestroyAPIView)()
     await message.answer("Привычка удалена!")
 
+
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
