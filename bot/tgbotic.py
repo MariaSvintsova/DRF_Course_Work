@@ -1,31 +1,39 @@
 import os
 import sys
+
+import django
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types import Message
 from aiogram.utils import executor
 from asgiref.sync import sync_to_async
 
-# Установите переменную окружения DJANGO_SETTINGS_MODULE
+# Установка переменной окружения DJANGO_SETTINGS_MODULE
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
-# Добавьте корневой каталог проекта в sys.path
+# Корневой каталог проекта в sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Настройка Django
-import django
-django.setup()
+try:
+    django.setup()
+except Exception as e:
+    print(f"Failed to setup Django: {e}")
+    sys.exit(1)
+# import django
+# django.setup()
 
-# Импортируйте Django модули после настройки Django
+# Импорт Django модуля после настройки Django
 from main.views import HabitCreateView, HabitUpdateAPIView, HabitDestroyAPIView, HabitViewSet
 from users.views import RegisterAPIView
 
 # Настройка бота
-bot = Bot(token="YOUR_TELEGRAM_BOT_TOKEN")
+bot = Bot(token="7309181886:AAGL8ologK1csMb8TaTCQZ65KxyoNWvzuy8")
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 @dp.message_handler(commands=['start'], state="*")
 async def start_command(message: Message) -> None:
+    """ Стартовая команда начала разговора """
     text = """
     Привет! Команды бота:
     /register - регистрация
@@ -38,6 +46,7 @@ async def start_command(message: Message) -> None:
 
 @dp.message_handler(commands=['register'], state='*')
 async def register(message: Message):
+    """ Команда для регистрации пользователя"""
     text_l = message.text.split()
     if len(text_l) != 5:
         await message.answer("Неверный формат команды. Используйте: /register <username> <phone> <email> <password>")
@@ -49,6 +58,7 @@ async def register(message: Message):
 
 @dp.message_handler(commands=['set_habit'], state='*')
 async def make_habit(message: Message):
+    """ Команда для создания привычки"""
     text_l = message.text.split()
     if len(text_l) != 13:
         await message.answer("Неверный формат команды. Используйте: /set_habit <title> <user_id> <place> <time> <action> <is_useful> <is_pleasant> <frequency> <duration> <is_published> <related_habit> <reward>")
@@ -61,6 +71,7 @@ async def make_habit(message: Message):
 
 @dp.message_handler(commands=['list_habits'], state='*')
 async def get_all_habits(message: Message):
+    """ Команда для получения списка привычек"""
     habits = await sync_to_async(HabitViewSet().get_queryset)()
     # Преобразуем список привычек в строку для отправки в сообщении
     habits_list = "\n".join([str(habit) for habit in habits])
@@ -68,12 +79,14 @@ async def get_all_habits(message: Message):
 
 @dp.message_handler(commands=['edit_habit'], state='*')
 async def edit_habit(message: Message):
+    """ Команда для редактирования привычки"""
     # Реализация логики редактирования привычки
     await sync_to_async(HabitUpdateAPIView)()
     await message.answer("Привычка отредактирована!")
 
 @dp.message_handler(commands=['delete_habit'], state='*')
 async def delete_habit(message: Message):
+    """ Команда для удаления привычки """
     # Реализация логики удаления привычки
     await sync_to_async(HabitDestroyAPIView)()
     await message.answer("Привычка удалена!")

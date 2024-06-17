@@ -10,6 +10,7 @@ bot = telegram.Bot(token=settings.TELEGRAM_BOT_TOKEN)
 
 @shared_task
 def send_telegram_reminder(obj):
+    """ Reminder for user in tg_bot """
     try:
         habit = Habit.objects.get(id=obj.id)
         message = f"Напоминание: пора выполнять привычку '{habit.title}' в {habit.time}"
@@ -19,7 +20,10 @@ def send_telegram_reminder(obj):
 
 @shared_task
 def schedule_daily_reminders():
+    """ Task to schedule daily reminders for published habits."""
     habits = Habit.objects.filter(is_published=True)
     for habit in habits:
         habit_time = datetime.combine(datetime.now().date(), habit.time)
         send_telegram_reminder.apply_async((habit.id,), eta=habit_time)
+
+

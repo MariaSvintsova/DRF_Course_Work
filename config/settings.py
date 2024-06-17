@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -62,6 +62,9 @@ CORS_ALLOWED_ORIGINS = [
     'https://your-frontend-domain.com',  # Адрес развернутого фронтенда
 ]
 ROOT_URLCONF = 'config.urls'
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'DELETE']
+CORS_ALLOW_HEADERS = ['Authorization', 'Content-Type']
 
 TEMPLATES = [
     {
@@ -147,3 +150,4 @@ CELERY_TIMEZONE = 'UTC'
 
 TELEGRAM_BOT_TOKEN = '7309181886:AAGL8ologK1csMb8TaTCQZ65KxyoNWvzuy8'
 
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')

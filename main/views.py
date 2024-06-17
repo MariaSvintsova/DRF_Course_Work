@@ -28,6 +28,7 @@ class HabitViewSet(viewsets.ModelViewSet):
 
 
 class HabitDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """ View for habit's details  """
 
     queryset = Habit.objects.all()
     serializer_class = HabitSerializer
@@ -39,6 +40,7 @@ class HabitDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class HabitCreateView(generics.CreateAPIView):
+    """ View for creating habit  """
     serializer_class = HabitSerializer
 
     def post(self, serializer):
@@ -48,12 +50,14 @@ class HabitCreateView(generics.CreateAPIView):
 
 
 class HabitUpdateAPIView(generics.UpdateAPIView):
+    """ View for upating habit  """
     serializer_class = HabitSerializer
     queryset = Habit.objects.all()
     permission_classes = [IsOwnerOrReadOnly]
 
 
 class HabitDestroyAPIView(generics.DestroyAPIView):
+    """ View for deleting habit  """
     queryset = Habit.objects.all()
     permission_classes = [IsOwnerOrReadOnly]
 
