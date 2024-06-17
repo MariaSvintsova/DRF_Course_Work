@@ -4,6 +4,7 @@ from django.db import models
 NULLABLE = {'blank': True, 'null': True}
 
 class User(AbstractUser):
+    """ Model User"""
     username = models.CharField(max_length=250, verbose_name='Имя')
     phone = models.CharField(max_length=100, verbose_name='Номер телефона', **NULLABLE)
     email = models.CharField(max_length=100, verbose_name='Email пользователя', **NULLABLE)
