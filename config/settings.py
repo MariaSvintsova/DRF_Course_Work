@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from pathlib import Path
 
+from celery.schedules import crontab
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -147,7 +149,14 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
-
+CELERY_BEAT_SCHEDULE = {
+    'schedule-daily-reminders': {
+        'task': 'main.tasks.schedule_daily_reminders',
+        'schedule': crontab(hour=0, minute=0),
+    },
+}
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
 TELEGRAM_BOT_TOKEN = '7309181886:AAGL8ologK1csMb8TaTCQZ65KxyoNWvzuy8'
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')

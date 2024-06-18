@@ -1,11 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 import os
-
-import telegram
-from celery import Celery, shared_task
-
-from config import settings
-from main.models import Habit
+from celery import Celery
 
 # Установка переменной окружения для настроек проекта
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
@@ -21,6 +16,7 @@ app.autodiscover_tasks()
 
 from celery.schedules import crontab
 
+# Настройка периодических задач
 app.conf.beat_schedule = {
     'schedule-daily-reminders': {
         'task': 'main.tasks.schedule_daily_reminders',
@@ -28,15 +24,15 @@ app.conf.beat_schedule = {
     },
 }
 
-bot = telegram.Bot(token=settings.TELEGRAM_BOT_TOKEN)
-
-@shared_task
-def send_telegram_reminder(habit_id):
-    try:
-        habit = Habit.objects.get(id=habit_id)
-        chat_id = habit.user.bot_id
-        if chat_id:
-            message = f"Напоминание: пора выполнять привычку '{habit.title}' в {habit.time}"
-            bot.send_message(chat_id=chat_id, text=message)
-    except Habit.DoesNotExist:
-        pass
+# bot = telegram.Bot(token=settings.TELEGRAM_BOT_TOKEN)
+# from main.models import Habit
+# @shared_task
+# def send_telegram_reminder(habit_id):
+#     try:
+#         habit = Habit.objects.get(id=habit_id)
+#         chat_id = habit.user.bot_id
+#         if chat_id:
+#             message = f"Напоминание: пора выполнять привычку '{habit.title}' в {habit.time}"
+#             bot.send_message(chat_id=chat_id, text=message)
+#     except Habit.DoesNotExist:
+#         pass
