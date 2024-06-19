@@ -29,6 +29,7 @@ class HabitViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
+
 class HabitDetailView(generics.RetrieveUpdateDestroyAPIView):
     """ View for habit's details  """
 
@@ -45,10 +46,11 @@ class HabitCreateView(generics.CreateAPIView):
     """ View for creating habit  """
     serializer_class = HabitSerializer
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+    async def post(self, request, *args, **kwargs):
+        data = request.data  # Получаем данные напрямую из аргументов функции
+        serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
-        new_habit = serializer.save(user=self.request.user)
+        new_habit = serializer.save(user=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class HabitUpdateAPIView(generics.UpdateAPIView):
