@@ -2,6 +2,8 @@ from django.shortcuts import render
 from rest_framework import viewsets, generics
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 
 from main.models import Habit
 from main.paginators import HabitsPagination
@@ -43,11 +45,11 @@ class HabitCreateView(generics.CreateAPIView):
     """ View for creating habit  """
     serializer_class = HabitSerializer
 
-    def post(self, serializer):
-        new_course = serializer.save()
-        new_course.owner = self.request.user
-        new_course.save()
-
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        new_habit = serializer.save(user=self.request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class HabitUpdateAPIView(generics.UpdateAPIView):
     """ View for upating habit  """
