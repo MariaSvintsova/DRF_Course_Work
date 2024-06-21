@@ -1,10 +1,10 @@
 from asgiref.sync import sync_to_async
-from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from users.models import User
 from users.serializers import UserSerializer, RegisterSerializer
+
 
 class UserListAPIView(generics.ListAPIView):
     """List all users."""
@@ -42,5 +42,3 @@ class UserDestroyAPIView(generics.DestroyAPIView):
     """Delete a user."""
     serializer_class = UserSerializer
     queryset = User.objects.all()
-
-

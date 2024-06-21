@@ -20,6 +20,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = "__all__"
 
+
     def save(self, validated_data):
         """Create and save a new user instance with validated data."""
         password = self.validated_data['password']
@@ -33,6 +34,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
 
 class UserSerializer(serializers.ModelSerializer):
     """

@@ -1,6 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 import os
 from celery import Celery
+from celery.schedules import crontab
+from django.conf import settings
 
 # Установка переменной окружения для настроек проекта
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
@@ -11,10 +13,11 @@ app = Celery('DRF_CourseWork')
 # Загрузка настроек из файла Django
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
-# Автоматическое обнаружение и регистрация задач из файлов tasks.py в приложениях Django
-app.autodiscover_tasks()
+# Автоматическое обнаружение и регистрация задач из файлов worker.py в приложениях Django
+app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
-from celery.schedules import crontab
+# Настройка периодических задач
+from main.worker import schedule_daily_reminders
 
 # Настройка периодических задач
 app.conf.beat_schedule = {

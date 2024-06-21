@@ -1,35 +1,28 @@
+from datetime import datetime
 import os
 import sys
+from django_setup import setup_django
 
-import django
+setup_django()
+
+# Корневой каталог проекта в sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from datetime import timedelta, timezone
+from users.views import RegisterAPIView
+from users.models import User
+from main.models import Habit
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types import Message
 from aiogram.utils import executor
 from asgiref.sync import sync_to_async
 from django.core.exceptions import ObjectDoesNotExist
-
-# Установка переменной окружения DJANGO_SETTINGS_MODULE
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
-
-# Настройка Django
-try:
-    django.setup()
-except Exception as e:
-    print(f"Failed to setup Django: {e}")
-    sys.exit(1)
-
-# Корневой каталог проекта в sys.path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# Импорт Django модуля после настройки Django
-from main.models import Habit
-from users.models import User
-from main.views import HabitCreateView, HabitUpdateAPIView, HabitDestroyAPIView, HabitViewSet
-from users.views import RegisterAPIView
+from config import settings
+from main.worker import send_telegram_reminder, schedule_daily_reminders
 
 # Настройка бота
-bot = Bot(token="7309181886:AAGL8ologK1csMb8TaTCQZ65KxyoNWvzuy8")
+bot = Bot(token=settings.TELEGRAM_BOT_TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
@@ -62,9 +55,6 @@ async def register(message: Message):
     await message.answer("Регистрация завершена!")
 
 
-from datetime import timedelta
-
-
 @dp.message_handler(commands=['set_habit'], state='*')
 async def make_habit(message: Message):
     text = message.text.replace('/set_habit', '').strip()
@@ -72,7 +62,11 @@ async def make_habit(message: Message):
 
     if len(text_l) != 11:
         await message.answer(
-            "Неверный формат команды. Используйте: /set_habit <title> <place> <time> <action> <is_useful> <is_pleasant> <frequency> <duration> <is_published> <related_habit> <reward>")
+            "Неверный формат команды. Используйте: "
+            "/set_habit <title> <place> <time> <action> "
+            "<is_useful> <is_pleasant> <frequency> <duration> "
+            "<is_published> <related_habit> <reward>"
+        )
         return
 
     title = text_l[0]
@@ -130,6 +124,16 @@ async def make_habit(message: Message):
         related_habit=related_habit,
         reward=reward
     )
+
+    remind_time = datetime.strptime(time, '%H:%M')  # Преобразование времени из строки в объект datetime
+    now = datetime.now()
+    today = datetime(now.year, now.month, now.day, remind_time.hour, remind_time.minute)
+    if now > today:
+        remind_time = today + timedelta(days=1)
+    else:
+        remind_time = today
+
+    schedule_daily_reminders.apply_async((new_habit.id,), eta=remind_time)
 
     await message.answer(f"Привычка '{title}' успешно создана!")
 
@@ -239,8 +243,6 @@ async def delete_habit(message: Message):
     await sync_to_async(habit.delete)()
 
     await message.answer(f"Привычка с id={habit_id} успешно удалена!")
-
-
 
 
 if __name__ == '__main__':

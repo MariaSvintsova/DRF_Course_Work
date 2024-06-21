@@ -1,5 +1,6 @@
 from rest_framework.pagination import PageNumberPagination
 
+
 class HabitsPagination(PageNumberPagination):
     """ Пагинация на 5 обьектов в страничке """
     page_size = 5

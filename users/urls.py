@@ -8,5 +8,5 @@ urlpatterns = [
     path('register/', RegisterAPIView.as_view(), name='user-register'),
     path('detail/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
     path('update/<int:pk>/', UserUpdateView.as_view(), name='user-update'),
-    path('delete/<int:pk>/', UserDestroyAPIView.as_view(), name='user-destroy'),  # Изменил с 'detail' на 'delete'
+    path('delete/<int:pk>/', UserDestroyAPIView.as_view(), name='user-destroy'),
 ]

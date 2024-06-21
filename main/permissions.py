@@ -1,5 +1,6 @@
 from rest_framework.permissions import BasePermission
 
+
 class IsOwnerOrReadOnly(BasePermission):
     """Каждый пользователь имеет доступ только к своим привычкам по механизму CRUD"""
 
